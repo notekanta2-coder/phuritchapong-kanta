@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Wealth - Premium Finance Dashboard</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons for premium iconography -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        zinc: {
+                            850: '#202022',
+                            900: '#18181b',
+                            950: '#09090b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b; /* zinc-950 */
+            color: #ffffff;
+        }
+
+        /* Custom Scrollbar for premium feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #52525b;
+        }
+
+        /* Modal Animation */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.2s ease-out;
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-500/30">
+
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 border-r border-zinc-800 bg-zinc-950/80 backdrop-blur-xl flex flex-col hidden md:flex sticky top-0 h-screen z-10">
+        <div class="p-6">
+            <div class="flex items-center space-x-3 font-bold text-xl mb-12">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i class="ph ph-wave-sine text-white text-xl"></i>
+                </div>
+                <span class="tracking-tight">Aura Wealth</span>
+            </div>
+            
+            <nav class="space-y-2">
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 bg-zinc-900 text-white rounded-xl font-medium transition-all border border-zinc-800 shadow-sm">
+                    <i class="ph ph-squares-four text-xl text-indigo-400"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900/50 rounded-xl font-medium transition-all group">
+                    <i class="ph ph-wallet text-xl group-hover:text-indigo-400 transition-colors"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900/50 rounded-xl font-medium transition-all group">
+                    <i class="ph ph-chart-pie-slice text-xl group-hover:text-indigo-400 transition-colors"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900/50 rounded-xl font-medium transition-all group">
+                    <i class="ph ph-gear text-xl group-hover:text-indigo-400 transition-colors"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </div>
+        
+        <div class="mt-auto p-6">
+            <div class="p-5 bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <h4 class="text-sm font-semibold mb-1 text-white flex items-center gap-2">
+                    <i class="ph-fill ph-sparkle text-indigo-400"></i> Pro Plan
+                </h4>
+                <p class="text-xs text-zinc-400 mb-4">Unlock advanced AI insights and unlimited history.</p>
+                <button class="w-full py-2 bg-white hover:bg-zinc-200 text-black rounded-lg text-xs font-semibold transition-colors relative z-10">
+                    Upgrade Now
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 md:p-10 space-y-8 overflow-y-auto">
+        
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Financial Overview</h1>
+                <p class="text-zinc-400 text-sm mt-1">Track your wealth and manage your expenses.</p>
+            </div>
+            <button 
+                onclick="openModal()"
+                class="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-indigo-500/25 active:scale-95 w-full sm:w-auto justify-center"
+            >
+                <i class="ph ph-plus-bold"></i>
+                <span>Add Transaction</span>
+            </button>
+        </header>
+
+        <!-- Overview Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <!-- Balance Card -->
+            <div class="bg-zinc-900/40 border border-zinc-800/60 p-6 rounded-3xl backdrop-blur-md transition-all hover:bg-zinc-900/60 hover:border-zinc-700">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 rounded-2xl bg-white/5 border border-white/10">
+                        <i class="ph ph-currency-dollar text-2xl text-white"></i>
+                    </div>
+                    <div class="flex items-center space-x-1 text-sm text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-full border border-emerald-400/20">
+                        <i class="ph ph-trend-up"></i>
+                        <span class="font-medium">+2.5%</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-zinc-400 text-sm font-medium mb-1">Total Balance</p>
+                    <h3 id="stat-balance" class="text-3xl font-bold tracking-tight text-white">$0.00</h3>
+                </div>
+            </div>
+
+            <!-- Income Card -->
+            <div class="bg-zinc-900/40 border border-zinc-800/60 p-6 rounded-3xl backdrop-blur-md transition-all hover:bg-zinc-900/60 hover:border-zinc-700">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                        <i class="ph ph-arrow-down-left text-2xl text-emerald-400"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-zinc-400 text-sm font-medium mb-1">Total Income</p>
+                    <h3 id="stat-income" class="text-3xl font-bold tracking-tight text-emerald-400">$0.00</h3>
+                </div>
+            </div>
+
+            <!-- Expense Card -->
+            <div class="bg-zinc-900/40 border border-zinc-800/60 p-6 rounded-3xl backdrop-blur-md transition-all hover:bg-zinc-900/60 hover:border-zinc-700 sm:col-span-2 lg:col-span-1">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20">
+                        <i class="ph ph-arrow-up-right text-2xl text-rose-400"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-zinc-400 text-sm font-medium mb-1">Total Expenses</p>
+                    <h3 id="stat-expense" class="text-3xl font-bold tracking-tight text-rose-400">$0.00</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Chart Section -->
+            <div class="lg:col-span-2 bg-zinc-900/40 border border-zinc-800/60 p-4 sm:p-6 rounded-3xl backdrop-blur-md flex flex-col min-h-[400px]">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white">Cash Flow</h3>
+                        <p class="text-sm text-zinc-400">Income vs Expenses (Last 7 Days)</p>
+                    </div>
+                </div>
+                <div class="flex-1 w-full relative">
+                    <canvas id="cashFlowChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Transactions List -->
+            <div class="lg:col-span-1 bg-zinc-900/40 border border-zinc-800/60 rounded-3xl p-6 flex flex-col h-[450px]">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-white">Recent History</h3>
+                    <button class="text-sm text-indigo-400 hover:text-indigo-300 font-medium">View All</button>
+                </div>
+                
+                <div id="transaction-list" class="flex-1 overflow-y-auto pr-2 space-y-3">
+                    <!-- Transactions will be injected here via JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Transaction Modal Backdrop -->
+    <div id="modal-backdrop" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        
+        <!-- Modal Content -->
+        <div id="modal-content" class="bg-zinc-950 border border-zinc-800 rounded-3xl w-full max-w-md p-6 sm:p-8 shadow-2xl transform scale-95 transition-transform duration-300">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-white">New Transaction</h2>
+                <button onclick="closeModal()" class="p-2 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-800 transition-colors">
+                    <i class="ph ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <form id="transaction-form" class="space-y-5">
+                <!-- Type Selection -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button type="button" id="btn-type-expense" onclick="selectType('expense')" class="p-3 rounded-2xl border flex items-center justify-center space-x-2 transition-all bg-rose-500/10 border-rose-500/50 text-rose-400">
+                        <i class="ph ph-arrow-up-right"></i>
+                        <span class="font-medium">Expense</span>
+                    </button>
+                    <button type="button" id="btn-type-income" onclick="selectType('income')" class="p-3 rounded-2xl border flex items-center justify-center space-x-2 transition-all border-zinc-800 text-zinc-400 hover:bg-zinc-900">
+                        <i class="ph ph-arrow-down-left"></i>
+                        <span class="font-medium">Income</span>
+                    </button>
+                </div>
+                
+                <input type="hidden" id="form-type" value="expense">
+
+                <!-- Title -->
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1.5">Title</label>
+                    <input type="text" id="form-title" placeholder="e.g. Coffee, Salary, Rent" required
+                        class="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-zinc-600">
+                </div>
+
+                <!-- Amount & Date -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-1.5">Amount</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-3 text-zinc-500 font-medium">$</span>
+                            <input type="number" id="form-amount" step="0.01" min="0" placeholder="0.00" required
+                                class="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-zinc-600">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-1.5">Date</label>
+                        <input type="date" id="form-date" required
+                            class="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all [color-scheme:dark]">
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1.5">Category</label>
+                    <input type="text" id="form-category" placeholder="e.g. Food, Transport, Salary" required
+                        class="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-zinc-600">
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3.5 rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 mt-6">
+                    Save Transaction
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- State Management ---
+        const STORAGE_KEY = 'aura_wealth_data';
+        let chartInstance = null;
+        
+        // Default data to show when app first opens
+        const defaultData = [
+            { id: '1', title: 'Senior Developer Salary', category: 'Income', amount: 8500, type: 'income', date: new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0] },
+            { id: '2', title: 'MacBook Pro M3', category: 'Electronics', amount: 2499, type: 'expense', date: new Date(Date.now() - 4 * 86400000).toISOString().split('T')[0] },
+            { id: '3', title: 'Groceries (Whole Foods)', category: 'Food', amount: 185, type: 'expense', date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0] },
+            { id: '4', title: 'Freelance Project', category: 'Income', amount: 1200, type: 'income', date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0] },
+            { id: '5', title: 'Netflix Subscription', category: 'Entertainment', amount: 20, type: 'expense', date: new Date(Date.now() - 1 * 86400000).toISOString().split('T')[0] },
+        ];
+
+        // Load from LocalStorage
+        let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (!transactions || transactions.length === 0) {
+            transactions = defaultData;
+            saveData();
+        }
+
+        // Set default date in form to today
+        document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
+
+        // --- Core Functions ---
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        }
+
+        function updateUI() {
+            updateStats();
+            renderTransactionList();
+            renderChart();
+        }
+
+        function updateStats() {
+            const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const expense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            const balance = income - expense;
+
+            document.getElementById('stat-balance').textContent = formatCurrency(balance);
+            document.getElementById('stat-income').textContent = formatCurrency(income);
+            document.getElementById('stat-expense').textContent = formatCurrency(expense);
+        }
+
+        function renderTransactionList() {
+            const listEl = document.getElementById('transaction-list');
+            listEl.innerHTML = '';
+
+            if (transactions.length === 0) {
+                listEl.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-zinc-500 py-10">
+                        <i class="ph ph-receipt text-5xl mb-3 opacity-20"></i>
+                        <p class="text-sm">No transactions yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by date newest first
+            const sorted = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            sorted.forEach(tx => {
+                const isIncome = tx.type === 'income';
+                const iconClass = isIncome ? 'ph-arrow-down-left text-emerald-400' : 'ph-arrow-up-right text-rose-400';
+                const bgClass = isIncome ? 'bg-emerald-400/10' : 'bg-rose-400/10';
+                const amountClass = isIncome ? 'text-emerald-400' : 'text-white';
+                const sign = isIncome ? '+' : '-';
+
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 sm:p-4 hover:bg-zinc-800/40 rounded-2xl transition-all group border border-transparent hover:border-zinc-700/50';
+                item.innerHTML = `
+                    <div class="flex items-center space-x-4 overflow-hidden">
+                        <div class="p-2.5 rounded-xl ${bgClass} shrink-0">
+                            <i class="ph ${iconClass} text-lg"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-white truncate">${tx.title}</p>
+                            <p class="text-xs text-zinc-500 mt-0.5 truncate">${tx.category} &bull; ${tx.date}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 shrink-0 pl-2">
+                        <span class="font-bold text-sm ${amountClass}">
+                            ${sign}${formatCurrency(tx.amount)}
+                        </span>
+                        <button onclick="deleteTransaction('${tx.id}')" class="opacity-0 group-hover:opacity-100 p-2 text-zinc-500 hover:text-rose-400 hover:bg-rose-400/10 rounded-lg transition-all focus:opacity-100" title="Delete">
+                            <i class="ph ph-trash"></i>
+                        </button>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('cashFlowChart').getContext('2d');
+            
+            // Process data for last 7 days
+            const chartDataObj = transactions.reduce((acc, curr) => {
+                if (!acc[curr.date]) acc[curr.date] = { income: 0, expense: 0 };
+                acc[curr.date][curr.type] += curr.amount;
+                return acc;
+            }, {});
+
+            // Sort dates and get last 7
+            let sortedDates = Object.keys(chartDataObj).sort((a, b) => new Date(a) - new Date(b)).slice(-7);
+            
+            // Generate dummy dates if no data
+            if(sortedDates.length === 0) {
+                const today = new Date();
+                for(let i=6; i>=0; i--) {
+                    const d = new Date(today);
+                    d.setDate(d.getDate() - i);
+                    sortedDates.push(d.toISOString().split('T')[0]);
+                    chartDataObj[sortedDates[i]] = {income: 0, expense: 0};
+                }
+            }
+
+            const labels = sortedDates.map(date => {
+                const d = new Date(date);
+                return `${d.getDate()} ${d.toLocaleString('default', { month: 'short' })}`;
+            });
+            const incomeData = sortedDates.map(date => chartDataObj[date]?.income || 0);
+            const expenseData = sortedDates.map(date => chartDataObj[date]?.expense || 0);
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            Chart.defaults.color = '#a1a1aa'; // zinc-400
+            Chart.defaults.font.family = 'Inter';
+
+            // Create Gradients
+            const incomeGradient = ctx.createLinearGradient(0, 0, 0, 400);
+            incomeGradient.addColorStop(0, 'rgba(52, 211, 153, 0.4)'); // emerald-400
+            incomeGradient.addColorStop(1, 'rgba(52, 211, 153, 0)');
+
+            const expenseGradient = ctx.createLinearGradient(0, 0, 0, 400);
+            expenseGradient.addColorStop(0, 'rgba(251, 113, 133, 0.4)'); // rose-400
+            expenseGradient.addColorStop(1, 'rgba(251, 113, 133, 0)');
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: incomeData,
+                            borderColor: '#34d399',
+                            backgroundColor: incomeGradient,
+                            borderWidth: 2,
+                            pointBackgroundColor: '#09090b',
+                            pointBorderColor: '#34d399',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Expense',
+                            data: expenseData,
+                            borderColor: '#fb7185',
+                            backgroundColor: expenseGradient,
+                            borderWidth: 2,
+                            pointBackgroundColor: '#09090b',
+                            pointBorderColor: '#fb7185',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(24, 24, 27, 0.9)', // zinc-900
+                            titleColor: '#fff',
+                            bodyColor: '#e4e4e7',
+                            borderColor: '#3f3f46',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false, drawBorder: false }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
+                            ticks: {
+                                callback: function(value) { return '$' + value; },
+                                maxTicksLimit: 6
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Modal & Form Logic ---
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const modalContent = document.getElementById('modal-content');
+        
+        function openModal() {
+            modalBackdrop.classList.remove('hidden');
+            // Small delay to allow display:block to apply before animating opacity
+            setTimeout(() => {
+                modalBackdrop.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            modalBackdrop.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modalBackdrop.classList.add('hidden');
+                document.getElementById('transaction-form').reset();
+                document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
+                selectType('expense'); // Reset type to default
+            }, 300);
+        }
+
+        function selectType(type) {
+            document.getElementById('form-type').value = type;
+            const btnExpense = document.getElementById('btn-type-expense');
+            const btnIncome = document.getElementById('btn-type-income');
+
+            if (type === 'expense') {
+                btnExpense.className = 'p-3 rounded-2xl border flex items-center justify-center space-x-2 transition-all bg-rose-500/10 border-rose-500/50 text-rose-400';
+                btnIncome.className = 'p-3 rounded-2xl border flex items-center justify-center space-x-2 transition-all border-zinc-800 text-zinc-400 hover:bg-zinc-900';
+            } else {
+                btnIncome.className = 'p-3 rounded-2xl border flex items-center justify-center space-x-2 transition-all bg-emerald-500/10 border-emerald-500/50 text-emerald-400';
+                btnExpense.className = 'p-3 rounded-2xl border flex items-center justify-center space-x-2 transition-all border-zinc-800 text-zinc-400 hover:bg-zinc-900';
+            }
+        }
+
+        document.getElementById('transaction-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newTx = {
+                id: Date.now().toString(),
+                type: document.getElementById('form-type').value,
+                title: document.getElementById('form-title').value,
+                amount: parseFloat(document.getElementById('form-amount').value),
+                date: document.getElementById('form-date').value,
+                category: document.getElementById('form-category').value
+            };
+
+            transactions.push(newTx);
+            saveData();
+            updateUI();
+            closeModal();
+        });
+
+        function deleteTransaction(id) {
+            // No confirm or alert as per rules, delete directly
+            transactions = transactions.filter(t => t.id !== id);
+            saveData();
+            updateUI();
+        }
+
+        // Close modal on outside click
+        modalBackdrop.addEventListener('click', function(e) {
+            if (e.target === modalBackdrop) {
+                closeModal();
+            }
+        });
+
+        // Initialize UI on load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+        });
+    </script>
+</body>
+</html>
